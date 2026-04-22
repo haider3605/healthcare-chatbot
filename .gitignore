@@ -6,7 +6,6 @@ env/
 __pycache__/
 *.pyc
 *.pyo
-*.pkl
 
 # Environment files
 .env
@@ -19,6 +18,3 @@ __pycache__/
 
 # Datasets (too large for GitHub)
 ml_model/datasets/
-
-# Models (too large for GitHub)
-ml_model/models/
