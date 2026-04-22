@@ -1,0 +1,24 @@
+# Virtual environments
+venv/
+env/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pkl
+
+# Environment files
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Datasets (too large for GitHub)
+ml_model/datasets/
+
+# Models (too large for GitHub)
+ml_model/models/
