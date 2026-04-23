@@ -1,3 +1,4 @@
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +10,17 @@ import numpy as np
 import os
 
 load_dotenv()
+print("SUPABASE_URL:", os.getenv("SUPABASE_URL"))
+print("GROQ_API_KEY:", os.getenv("GROQ_API_KEY"))
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+}
 
 app = FastAPI(title="Healthcare Chatbot API")
 
@@ -75,6 +87,18 @@ class HeartRequest(BaseModel):
 class ExplainRequest(BaseModel):
     disease: str
     confidence: float
+class SavePredictionRequest(BaseModel):
+    user_id: str
+    disease_type: str
+    symptoms: list = []
+    predicted_disease: str
+    confidence: float
+    explanation: str = ""
+
+class SaveChatRequest(BaseModel):
+    user_id: str
+    message: str
+    response: str
 
 # Routes
 @app.get("/")
@@ -264,3 +288,59 @@ def get_symptoms():
         "symptoms": symptom_columns,
         "count": len(symptom_columns)
     }
+@app.post("/save-prediction")
+def save_prediction(request: SavePredictionRequest):
+    try:
+        data = {
+            "user_id": request.user_id,
+            "disease_type": request.disease_type,
+            "symptoms": request.symptoms,
+            "predicted_disease": request.predicted_disease,
+            "confidence": request.confidence,
+            "explanation": request.explanation
+        }
+        response = httpx.post(
+            f"{SUPABASE_URL}/rest/v1/predictions",
+            headers=SUPABASE_HEADERS,
+            json=data
+        )
+        return {"status": "saved", "response": response.json(), "status_code": response.status_code}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/save-chat")
+def save_chat(request: SaveChatRequest):
+    try:
+        data = {
+            "user_id": request.user_id,
+            "message": request.message,
+            "response": request.response
+        }
+        response = httpx.post(
+            f"{SUPABASE_URL}/rest/v1/chat_history",
+            headers=SUPABASE_HEADERS,
+            json=data
+        )
+        return {"status": "saved"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/history/{user_id}")
+def get_history(user_id: str):
+    try:
+        predictions = httpx.get(
+            f"{SUPABASE_URL}/rest/v1/predictions",
+            headers=SUPABASE_HEADERS,
+            params={"user_id": f"eq.{user_id}", "order": "created_at.desc"}
+        )
+        chats = httpx.get(
+            f"{SUPABASE_URL}/rest/v1/chat_history",
+            headers=SUPABASE_HEADERS,
+            params={"user_id": f"eq.{user_id}", "order": "created_at.desc"}
+        )
+        return {
+            "predictions": predictions.json(),
+            "chats": chats.json()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
