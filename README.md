@@ -69,7 +69,5 @@ This chatbot is for educational purposes only and does not replace professional 
 
 👨‍💻 Author
 Syed Shaheer Haider
-shery9190@gmail.com
-
-GitHub: https://github.com/your-username
-Email: your-email@example.com
+GitHub: https://github.com/haider3605
+Email: shery9190@gmail.com
