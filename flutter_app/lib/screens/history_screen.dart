@@ -34,12 +34,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final chats = data['chats'] as List? ?? [];
 
       setState(() {
-        // Combine predictions and chats into one list
-        _history = [
-          ...predictions.map((p) => {...p, 'record_type': 'prediction'}),
-          ...chats.map((c) => {...c, 'record_type': 'chat'}),
-        ];
-        // Sort by date newest first
+        final predictions = (data['predictions'] as List? ?? [])
+            .map(
+              (p) => Map<String, dynamic>.from({
+                ...p,
+                'record_type': 'prediction',
+              }),
+            )
+            .toList();
+        final chats = (data['chats'] as List? ?? [])
+            .map(
+              (c) => Map<String, dynamic>.from({...c, 'record_type': 'chat'}),
+            )
+            .toList();
+
+        _history = [...predictions, ...chats];
         _history.sort(
           (a, b) => (b['created_at'] ?? '').compareTo(a['created_at'] ?? ''),
         );
@@ -85,7 +94,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         padding: const EdgeInsets.all(16),
         itemCount: _history.length,
         itemBuilder: (context, index) {
-          final item = _history[index];
+          final item = Map<String, dynamic>.from(_history[index]);
           return _buildCard(item);
         },
       ),
