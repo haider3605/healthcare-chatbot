@@ -186,39 +186,78 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF1E293B),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Diseases Covered',
+          '17 Diseases Covered',
           style: GoogleFonts.inter(
             color: const Color(0xFFF1F5F9),
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children:
-              [
-                    '🦟 Malaria',
-                    '🤒 Typhoid',
-                    '🫁 Pneumonia',
-                    '🩸 Diabetes',
-                    '❤️ Heart Disease',
-                  ]
-                  .map(
-                    (d) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          Text(
-                            d,
-                            style: GoogleFonts.inter(
-                              color: const Color(0xFFE2E8F0),
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Symptom-based (15):',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF0D9488),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...[
+                '🦟 Malaria',
+                '🤒 Typhoid',
+                '🫁 Pneumonia',
+                '🦟 Dengue',
+                '🟡 Hepatitis A',
+                '🟡 Hepatitis B',
+                '💊 Hypertension',
+                '🦠 Urinary Tract Infection',
+                '🐔 Chicken Pox',
+                '🟡 Jaundice',
+                '🤕 Migraine',
+                '🤢 Gastroenteritis',
+                '🫁 Bronchial Asthma',
+                '🤧 Common Cold',
+                '🫀 Tuberculosis',
+              ].map(
+                (d) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text(
+                    d,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFE2E8F0),
+                      fontSize: 13,
                     ),
-                  )
-                  .toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Risk Assessment (2):',
+                style: GoogleFonts.inter(
+                  color: const Color(0xFF0D9488),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 6),
+              ...['🩸 Diabetes', '❤️ Heart Disease'].map(
+                (d) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Text(
+                    d,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFE2E8F0),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(

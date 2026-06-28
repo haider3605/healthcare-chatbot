@@ -45,8 +45,14 @@ class ApiService {
     return response.data['explanation'];
   }
 
-  Future<String> chat(String message) async {
-    final response = await _dio.post('/chat', data: {'message': message});
+  Future<String> chat(
+    String message, {
+    List<Map<String, String>> history = const [],
+  }) async {
+    final response = await _dio.post(
+      '/chat',
+      data: {'message': message, 'history': history},
+    );
     return response.data['response'];
   }
 

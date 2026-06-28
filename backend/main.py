@@ -253,31 +253,37 @@ Keep the language simple and friendly."""
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-    """
-    General health chat — only discusses the 5 diseases.
-    """
     try:
-        SYSTEM_PROMPT = """You are a healthcare assistant that helps users understand 
-symptoms related to 17 diseases only: Malaria, Typhoid, Pneumonia, Dengue,
+        system_prompt = """You are a healthcare assistant that only discusses 
+these 17 conditions: Malaria, Typhoid, Pneumonia, Dengue, Hepatitis A,
 Hepatitis B, Tuberculosis, Hypertension, Urinary Tract Infection,
-Chicken Pox, Jaundice, Hepatitis A, Migraine, Gastroenteritis,
-Bronchial Asthma, Common Cold, Diabetes, and Heart Disease.
+Chicken Pox, Jaundice, Migraine, Gastroenteritis, Bronchial Asthma,
+Common Cold, Diabetes, Heart Disease.
 
-Rules you must follow:
-1. Only discuss these 17 diseases
-2. Always recommend consulting a real doctor
-3. Never make a definitive diagnosis
-4. If user mentions emergency symptoms like chest pain or difficulty breathing,
-   immediately say: EMERGENCY - Please call a doctor or go to hospital immediately
-5. Keep responses short, clear and friendly
-6. Always end with a disclaimer that this is not medical advice"""
+Rules:
+- Only answer questions related to these 17 diseases
+- Never make a definitive diagnosis
+- Always recommend seeing a doctor
+- If user describes emergency symptoms like chest pain or difficulty breathing say: 
+  EMERGENCY - Please go to a hospital immediately
+- Keep responses short and clear
+- Remember the conversation context and refer back to it when relevant
+- End every response with: This is not medical advice."""
+
+        # Build messages with history
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history
+        for hist_item in request.history:
+            if isinstance(hist_item, dict) and 'role' in hist_item:
+                messages.append(hist_item)
+        
+        # Add current message
+        messages.append({"role": "user", "content": request.message})
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": request.message}
-            ],
+            messages=messages,
             temperature=0.3
         )
 

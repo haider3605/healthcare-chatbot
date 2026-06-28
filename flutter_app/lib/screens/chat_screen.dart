@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/api_service.dart';
 
+final List<Map<String, String>> _conversationHistory = [];
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -26,7 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _addBotMessage(
-      "Hello! I'm HealthAI 👋\n\nI can help you with:\n• Malaria, Typhoid, Pneumonia\n• Diabetes & Heart Disease\n\nDescribe your symptoms or ask me a health question.",
+      "Hello! I'm HealthAI 👋\n\nI can help you with 17 diseases:\n\n🦟 Malaria  🤒 Typhoid  🫁 Pneumonia\n🦟 Dengue  🫀 Hepatitis A & B\n🫁 Tuberculosis  💊 Hypertension\n🦠 UTI  🐔 Chicken Pox  🟡 Jaundice\n🤕 Migraine  🤢 Gastroenteritis\n🫁 Bronchial Asthma  🤧 Common Cold\n🩸 Diabetes  ❤️ Heart Disease\n\nDescribe your symptoms or ask me a health question.",
     );
   }
 
@@ -125,14 +127,38 @@ class _ChatScreenState extends State<ChatScreen> {
             "I detected these symptoms from your message. Please confirm or edit them before I analyze:",
           );
         } else {
-          // No symptoms extracted — fall back to chat
-          final response = await _apiService.chat(message);
+          // No symptoms found, treat as general chat
+          final response = await _apiService.chat(
+            message,
+            history: _conversationHistory,
+          );
+
+          _conversationHistory.add({"role": "user", "content": message});
+          _conversationHistory.add({"role": "assistant", "content": response});
+
+          if (_conversationHistory.length > 20) {
+            _conversationHistory.removeRange(0, 2);
+          }
+
           _addBotMessage(response);
           _saveChat(message, response);
         }
       } else {
         // General chat
-        final response = await _apiService.chat(message);
+        final response = await _apiService.chat(
+          message,
+          history: _conversationHistory,
+        );
+
+        // Add to conversation history
+        _conversationHistory.add({"role": "user", "content": message});
+        _conversationHistory.add({"role": "assistant", "content": response});
+
+        // Keep history to last 10 messages to avoid token limits
+        if (_conversationHistory.length > 20) {
+          _conversationHistory.removeRange(0, 2);
+        }
+
         _addBotMessage(response);
         _saveChat(message, response);
       }
@@ -235,6 +261,23 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF94A3B8)),
+            onPressed: () {
+              setState(() {
+                _messages.clear();
+                _conversationHistory.clear();
+                _pendingSymptoms.clear();
+                _showSymptomConfirmation = false;
+              });
+              _addBotMessage(
+                "Hello! I'm HealthAI 👋\n\nI can help you with 17 diseases:\n\n🦟 Malaria  🤒 Typhoid  🫁 Pneumonia\n🦟 Dengue  🫀 Hepatitis A & B\n🫁 Tuberculosis  💊 Hypertension\n🦠 UTI  🐔 Chicken Pox  🟡 Jaundice\n🤕 Migraine  🤢 Gastroenteritis\n🫁 Bronchial Asthma  🤧 Common Cold\n🩸 Diabetes  ❤️ Heart Disease\n\nDescribe your symptoms or ask me a health question.",
+              );
+            },
+            tooltip: 'Clear chat',
+          ),
+        ],
         backgroundColor: const Color(0xFF1E293B),
         elevation: 0,
         leading: IconButton(
